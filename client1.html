@@ -67,13 +67,11 @@
 
     <div id="loan-application-section" class="section" style="display: none">
       <h2 id="welcome-message"></h2>
-
-      <button onclick="genererPDF()">📄 Générer PDF</button>
-
       <button onclick="logoutClient()" style="float: right">Déconnexion</button>
       <h2>Demander un Prêt</h2>
       <select id="pret-type"></select>
       <input type="number" id="pret-montant" placeholder="Montant du prêt" />
+      <input type="date" id="pret-date" placeholder="Date de prêt" />
       <button onclick="demanderPret()">Demander un prêt</button>
     </div>
 
@@ -116,12 +114,6 @@
           }
         };
         xhr.send(JSON.stringify(data));
-
-        // const encoded = Object.keys(data)
-        //   .map((k) => encodeURIComponent(k) + "=" + encodeURIComponent(data[k]))
-        //   .join("&");
-
-        // xhr.send(encoded);
       }
 
       function loginClient() {
@@ -177,14 +169,16 @@
       function demanderPret() {
         if (!currentClientId) return;
         const id_type_pret = document.getElementById("pret-type").value;
+        const date_demande = document.getElementById("pret-date").value;
         const montant = document.getElementById("pret-montant").value;
         ajax(
           "POST",
           "/prets",
-          { id_client: currentClientId, id_type_pret, montant },
+          { id_client: currentClientId, id_type_pret, montant, date_demande },
           () => {
             chargerPrets();
             document.getElementById("pret-montant").value = "";
+            document.getElementById("pret-date").value = "";
           }
         );
       }
@@ -207,22 +201,6 @@
         document.getElementById("loan-list-section").style.display = "none";
         document.getElementById("client-nom").value = "";
         document.getElementById("client-mdp").value = "";
-      }
-
-      function genererPDF() {
-        if (!currentClientId) return;
-        ajax(
-          "POST",
-          "/pdf/generate",
-          { client_id: currentClientId },
-          function (response) {
-            if (response.success) {
-              window.open(response.url, "_blank");
-            } else {
-              alert("Erreur : " + response.error);
-            }
-          }
-        );
       }
     </script>
   </body>

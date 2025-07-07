@@ -3,6 +3,7 @@ require_once __DIR__ . '/../controllers/EtablissementFinancierController.php';
 require_once __DIR__ . '/../controllers/TypePretController.php';
 require_once __DIR__ . '/../controllers/ClientController.php';
 require_once __DIR__ . '/../controllers/PretController.php';
+require_once __DIR__ . '/../controllers/PdfController.php';
 
 // GESTION DE L'ÉTABLISSEMENT FINANCIER
 Flight::route('GET /ef/fonds', ['EtablissementFinancierController', 'getFonds']);
@@ -25,3 +26,5 @@ Flight::route('POST /prets', ['PretController', 'add']);
 Flight::route('POST /prets/@id/approuver', ['PretController', 'approuver']);
 Flight::route('POST /prets/@id/rejeter', ['PretController', 'rejeter']);
 Flight::route('POST /prets/@id/annuler', ['PretController', 'annuler']);
+
+Flight::route('POST /pdf/generate', ['PdfController', 'generate']);

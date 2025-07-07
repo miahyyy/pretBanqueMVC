@@ -19,7 +19,8 @@ CREATE TABLE EtablissementFinancier (
 CREATE TABLE historique_EtablissementFinancier (
     id INT AUTO_INCREMENT PRIMARY KEY,
     fond DECIMAL(15, 2) NOT NULL,
-    type ENUM('ENTREE', 'SORTIE') NOT NULL
+    type ENUM('ENTREE', 'SORTIE') NOT NULL,
+    description VARCHAR(255) NOT NULL
 );
 
 -- type de prêt
@@ -58,7 +59,7 @@ CREATE TABLE Pret (
 
 CREATE TABLE Remboursement (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    in_Pret INT NOT NULL,
+    id_Pret INT NOT NULL,
     date_debut DATE NOT NULL,
     montant_par_moi DECIMAL NOT NULL,
     nombre_mois INT NOT NULL,

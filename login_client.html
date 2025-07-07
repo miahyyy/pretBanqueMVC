@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Inscription</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-gap: 40px;
+        justify-items: center;
+      }
+      input,
+      select,
+      button {
+        margin: 5px;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+      }
+      button {
+        cursor: pointer;
+        background-color: #007bff;
+        color: white;
+        border: none;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      h1,
+      h2 {
+        color: #333;
+      }
+      .section {
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #fafafa;
+        width: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="login-section" class="section">
+      <h2>Inscription Client</h2>
+      <input type="text" id="client-nom" placeholder="Nom d'utilisateur" />
+      <input type="password" id="client-mdp" placeholder="Mot de passe" />
+      <button onclick="inscriptionClient()">S'inscrire</button>
+    </div>
+
+    <div>
+      <a href="client.html"><button type="submit">Log in</button></a>
+    </div>
+
+    <div>
+      <a href="login.html"><button type="submit">Partie Admin</button></a>
+    </div>
+
+    <script>
+      const apiBase = "http://localhost:8000";
+      let currentClientId = null;
+
+      function ajax(method, url, data, callback) {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, apiBase + url, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 4) {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              callback(JSON.parse(xhr.responseText));
+            } else {
+              alert(`Erreur: ${xhr.responseText}`);
+            }
+          }
+        };
+        xhr.send(JSON.stringify(data));
+      }
+
+      function inscriptionClient() {
+        const nom = document.getElementById("client-nom").value;
+        const mdp = document.getElementById("client-mdp").value;
+
+        if (!nom || !mdp) {
+          alert("Veuillez remplir tous les champs.");
+          return;
+        }
+        ajax("POST", "/clients", { nom, mdp }, function (data) {
+          if (data.nom != null && data.mdp != null) {
+            document.getElementById("client-nom").value = "";
+            document.getElementById("client-mdp").value = "";
+            alert("Inscription réussie !");
+            window.location.href = "client.html";
+          } else {
+            alert("Échec de la connexion : " + data.error);
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

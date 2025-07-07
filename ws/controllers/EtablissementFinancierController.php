@@ -12,4 +12,10 @@ class EtablissementFinancierController {
         $result = EtablissementFinancier::addFonds($data);
         Flight::json($result);
     }
+
+    public static function getHistoriqueFonds(){
+         $data = Flight::request()->data;
+        $result = EtablissementFinancier::historiqueFond($data);
+        Flight::json($result);
+    }
 }

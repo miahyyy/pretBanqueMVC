@@ -31,13 +31,13 @@ class Pret {
 
     public static function add($data) {
         $db = getDB();
-        if (empty($data->id_client) || empty($data->id_type_pret) || !isset($data->montant) || !is_numeric($data->montant) || $data->montant <= 0) {
+        if (empty($data->id_client) || empty($data->id_type_pret) || !isset($data->montant) || !is_numeric($data->montant) || $data->montant <= 0 || empty($data->date_demande)) {
             http_response_code(400);
             return ['error' => 'Données de prêt invalides.'];
         }
 
-        $statement = $db->prepare("INSERT INTO Pret (id_client, id_type_pret, montant, date_demande) VALUES (?, ?, ?, CURDATE())");
-        $statement->execute([$data->id_client, $data->id_type_pret, $data->montant]);
+        $statement = $db->prepare("INSERT INTO Pret (id_client, id_type_pret, montant, date_demande) VALUES (?, ?, ?, ?)");
+        $statement->execute([$data->id_client, $data->id_type_pret, $data->montant, $data->date_demande]);
         $new_id = $db->lastInsertId();
 
         return ['id' => $new_id, 'message' => 'Demande de prêt enregistrée.'];

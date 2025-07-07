@@ -18,4 +18,5 @@ class ClientController {
         $result = Client::login($data);
         Flight::json($result);
     }
+
 }

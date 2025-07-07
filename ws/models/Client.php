@@ -15,11 +15,17 @@ class Client {
             return ['error' => 'Le nom du client est requis.'];
         }
 
-        $statement = $db->prepare("INSERT INTO Client (nom) VALUES (?)");
-        $statement->execute([$data->nom]);
+        if (empty($data->mdp)) {
+            http_response_code(400);
+            return ['error' => 'Le mot de passe est requis.'];
+        }
+
+        $statement = $db->prepare("INSERT INTO Client (nom, mdp) VALUES (?, ?)");
+        $statement->execute([$data->nom, $data->mdp]);
+        $statement->fetchAll(PDO::FETCH_ASSOC);
         $new_id = $db->lastInsertId();
 
-        return ['id' => $new_id, 'nom' => $data->nom];
+        return ['id' => $new_id, 'nom' => $data->nom, 'mdp' => $data->mdp];
     }
 
     public static function login($data) {

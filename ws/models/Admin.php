@@ -2,22 +2,15 @@
 require_once __DIR__ . '/../db.php';
 
 class Admin {
-    public static function loginAdmin($data){
+    public static function loginAdmin($nom, $mdp){
         $db = getDB();
 
-    if (empty($data->nom) || empty($data->mdp)) {
-        send_json(['error' => 'Nom ou mot de passe manquant.'], 400);
-        return;
-    }
+        if (empty($nom) || empty($mdp)) {
+            return false;
+        }
 
-    $stmt = $db->prepare("SELECT id FROM admin WHERE nom = ? AND mdp = ?");
-    $stmt->execute([$data->nom, $data->mdp]);
-    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($admin) {
-        send_json(['success' => true]);
-    } else {
-        send_json(['error' => 'Identifiants invalides.'], 401);
-    }
+        $stmt = $db->prepare("SELECT id FROM Admin WHERE nom = ? AND mdp = ?");
+        $stmt->execute([$nom, $mdp]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) !== false;
     }
 }

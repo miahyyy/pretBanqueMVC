@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Connexion – Gestion de Prêts Bancaires</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="login-box">
+      <h2>Connexion Admin</h2>
+      <label for="nom">Nom :</label>
+      <input type="text" id="nom" placeholder="Entrer votre nom" />
+      <br />
+      <label for="mdp">Mot de passe :</label>
+      <input type="password" id="mdp" placeholder="Entrer le mot de passe" />
+
+      <button onclick="login()">Connexion</button>
+    </div>
+
+    <script>
+      const apiBase = "http://localhost:8000";
+
+      function ajax(method, url, data, callback) {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, apiBase + url, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 4) {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              callback(JSON.parse(xhr.responseText));
+            } else {
+              alert("Erreur : " + xhr.responseText);
+            }
+          }
+        };
+        xhr.send(JSON.stringify(data));
+      }
+
+      function login() {
+        const nom = document.getElementById("nom").value;
+        const mdp = document.getElementById("mdp").value;
+
+        if (!nom || !mdp) {
+          alert("Veuillez remplir tous les champs.");
+          return;
+        }
+
+        ajax("POST", "/login", { nom, mdp }, (data) => {
+          if (data.success) {
+            alert("Connexion réussie !");
+            window.location.href = "index.html";
+          } else {
+            alert("Échec de la connexion : " + data.error);
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

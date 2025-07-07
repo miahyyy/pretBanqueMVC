@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Intérêts Gagnés par Mois</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            display: block;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+        }
+        .filters {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Rapport des Intérêts Gagnés</h1>
+
+    <div class="section filters">
+        <h2>Filtrer par Période</h2>
+        <label for="date-debut">Date de début:</label>
+        <input type="month" id="date-debut" name="date-debut">
+        <label for="date-fin">Date de fin:</label>
+        <input type="month" id="date-fin" name="date-fin">
+        <button onclick="chargerInterets()">Filtrer</button>
+    </div>
+
+    <div class="section">
+        <h2>Tableau des Intérêts</h2>
+        <table id="table-interets">
+            <thead>
+                <tr>
+                    <th>Mois</th>
+                    <th>Intérêts Gagnés (€)</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Graphique des Intérêts</h2>
+        <canvas id="interets-graph"></canvas>
+    </div>
+</div>
+
+<script>
+    const apiBase = "http://localhost:8000";
+    let interetsChart = null;
+
+    function ajax(method, url, data, callback) {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, apiBase + url, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === 4) {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    callback(JSON.parse(xhr.responseText));
+                } else {
+                    alert(`Erreur: ${xhr.responseText}`);
+                }
+            }
+        };
+        xhr.send(JSON.stringify(data));
+    }
+
+    function chargerInterets() {
+        const dateDebut = document.getElementById('date-debut').value;
+        const dateFin = document.getElementById('date-fin').value;
+
+        if (!dateDebut || !dateFin) {
+            alert("Veuillez sélectionner une date de début et de fin.");
+            return;
+        }
+
+        ajax(`GET`, `/interets-gagnes?date_debut=${dateDebut}-01&date_fin=${dateFin}-01`, null, (data) => {
+            const tbody = document.querySelector("#table-interets tbody");
+            tbody.innerHTML = "";
+            data.forEach(item => {
+                tbody.innerHTML += `<tr><td>${item.mois}</td><td>${item.interet.toFixed(2)} €</td></tr>`;
+            });
+            mettreAJourGraph(data);
+        });
+    }
+
+    function mettreAJourGraph(data) {
+        const ctx = document.getElementById('interets-graph').getContext('2d');
+        const labels = data.map(item => item.mois);
+        const values = data.map(item => item.interet);
+
+        if (interetsChart) {
+            interetsChart.destroy();
+        }
+
+        interetsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Intérêts Gagnés par Mois (€)',
+                    data: values,
+                    backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                    borderColor: 'rgba(0, 123, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Initialisation avec des dates par défaut
+    document.addEventListener('DOMContentLoaded', () => {
+        const today = new Date();
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(today.getMonth() - 6);
+
+        document.getElementById('date-debut').value = sixMonthsAgo.toISOString().substring(0, 7);
+        document.getElementById('date-fin').value = today.toISOString().substring(0, 7);
+        
+        chargerInterets();
+    });
+
+</script>
+
+</body>
+</html>

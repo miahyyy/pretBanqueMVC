@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Demande de Prêt</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-gap: 40px;
+        justify-items: center;
+      }
+      input,
+      select,
+      button {
+        margin: 5px;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+      }
+      button {
+        cursor: pointer;
+        background-color: #007bff;
+        color: white;
+        border: none;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      h1,
+      h2 {
+        color: #333;
+      }
+      .section {
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #fafafa;
+        width: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="login-section" class="section">
+      <h2>Connexion Client</h2>
+      <input type="text" id="client-nom" placeholder="Nom d'utilisateur" />
+      <input type="password" id="client-mdp" placeholder="Mot de passe" />
+      <button onclick="loginClient()">Se connecter</button>
+    </div>
+
+    <div id="loan-application-section" class="section" style="display: none">
+      <h2 id="welcome-message"></h2>
+      <button onclick="logoutClient()" style="float: right">Déconnexion</button>
+      <h2>Demander un Prêt</h2>
+      <select id="pret-type"></select>
+      <input type="number" id="pret-montant" placeholder="Montant du prêt" />
+      <button onclick="demanderPret()">Demander un prêt</button>
+    </div>
+
+    <div id="loan-list-section" class="section" style="display: none">
+      <h2>Mes Demandes de Prêts</h2>
+      <table id="table-prets">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Montant</th>
+            <th>Date</th>
+            <th>Statut</th>
+            <th>Approbation</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <script>
+      const apiBase = "http://localhost:8000";
+      let currentClientId = null;
+
+      function ajax(method, url, data, callback) {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, apiBase + url, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 4) {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              callback(JSON.parse(xhr.responseText));
+            } else {
+              alert(`Erreur: ${xhr.responseText}`);
+            }
+          }
+        };
+        xhr.send(JSON.stringify(data));
+      }
+
+      function loginClient() {
+        const nom = document.getElementById("client-nom").value;
+        const mdp = document.getElementById("client-mdp").value;
+        ajax("POST", "/client/login", { nom, mdp }, (data) => {
+          if (data.id) {
+            currentClientId = data.id;
+            document.getElementById("login-section").style.display = "none";
+            document.getElementById("loan-application-section").style.display =
+              "block";
+            document.getElementById("loan-list-section").style.display =
+              "block";
+            document.getElementById(
+              "welcome-message"
+            ).textContent = `Bienvenue, ${data.nom}`;
+            initialiserApp();
+          } else {
+            alert("Échec de la connexion.");
+          }
+        });
+      }
+
+      // --- Types de Prêt ---
+      function chargerTypesPret() {
+        ajax("GET", "/types-pret", null, (data) => {
+          const select = document.getElementById("pret-type");
+          select.innerHTML = "";
+          data.forEach((t) => {
+            select.innerHTML += `<option value="${t.id}">${t.nom} (${t.taux}%)</option>`;
+          });
+        });
+      }
+
+      // --- Prêts ---
+      function chargerPrets() {
+        if (!currentClientId) return;
+        ajax("GET", `/prets/client/${currentClientId}`, null, (data) => {
+          const tbody = document.querySelector("#table-prets tbody");
+          tbody.innerHTML = "";
+          data.forEach((p) => {
+            let actions = "";
+            if (p.statut === "EN ATTENTE") {
+              actions = `<button onclick="annulerPret(${p.id})">Annuler</button>`;
+            } else {
+              actions = p.statut;
+            }
+            tbody.innerHTML += `<tr><td>${p.id}</td><td>${p.type_pret}</td><td>${p.montant} €</td><td>${p.date_demande}</td><td>${p.statut}</td><td>${actions}</td></tr>`;
+          });
+        });
+      }
+
+      function demanderPret() {
+        if (!currentClientId) return;
+        const id_type_pret = document.getElementById("pret-type").value;
+        const montant = document.getElementById("pret-montant").value;
+        ajax(
+          "POST",
+          "/prets",
+          { id_client: currentClientId, id_type_pret, montant },
+          () => {
+            chargerPrets();
+            document.getElementById("pret-montant").value = "";
+          }
+        );
+      }
+
+      function annulerPret(id) {
+        ajax("POST", `/prets/${id}/annuler`, {}, chargerPrets);
+      }
+
+      // --- Initialisation ---
+      function initialiserApp() {
+        chargerTypesPret();
+        chargerPrets();
+      }
+
+      function logoutClient() {
+        currentClientId = null;
+        document.getElementById("login-section").style.display = "block";
+        document.getElementById("loan-application-section").style.display =
+          "none";
+        document.getElementById("loan-list-section").style.display = "none";
+        document.getElementById("client-nom").value = "";
+        document.getElementById("client-mdp").value = "";
+      }
+    </script>
+  </body>
+</html>

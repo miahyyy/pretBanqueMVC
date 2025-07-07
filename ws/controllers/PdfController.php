@@ -54,16 +54,16 @@ class PdfController {
         $fileName = 'rapport_pret_client_' . $client_id . '.pdf';
         $filePath = __DIR__ . '../public/temp' . $dest_dir . '/' . $fileName;
 
-        // Ensure the directory exists
-        $dir = dirname($filePath);
-        if (!is_dir($dir)) {
-            // Use recursive mkdir and check for errors
-            if (!mkdir($dir, 0777, true) && !is_dir($dir)) {
-                http_response_code(500);
-                echo json_encode(['error' => 'Impossible de créer le répertoire de destination.']);
-                exit;
-            }
-        }
+        // Remove directory creation since PDF is output directly to browser
+        // $dir = dirname($filePath);
+        // if (!is_dir($dir)) {
+        //     // Use recursive mkdir and check for errors
+        //     if (!mkdir($dir, 0777, true) && !is_dir($dir)) {
+        //         http_response_code(500);
+        //         echo json_encode(['error' => 'Impossible de créer le répertoire de destination.']);
+        //         exit;
+        //     }
+        // }
 
         $pdf = new FPDF();
         $pdf->AddPage();
@@ -95,11 +95,9 @@ class PdfController {
             $pdf->Ln();
         }
 
-        $pdf->Output('F', $filePath);
-
-        echo json_encode(['success' => true, 'url' => $dest_dir . '/' . $fileName]);
+        // Output PDF directly to browser for download, allowing user to choose destination directory
+        $pdf->Output('D', $fileName);
         exit;
-
 
 http_response_code(405);
 echo json_encode(['error' => 'Méthode non autorisée.']);

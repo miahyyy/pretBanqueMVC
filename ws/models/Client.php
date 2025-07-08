@@ -46,4 +46,34 @@ class Client {
             return ['error' => 'Identifiants invalides.'];
         }
     }
+
+    public static function getCompte($id) {
+        $db = getDB();
+        $stmt = $db->prepare("SELECT compte FROM Fond_Client WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public static function addCompte($id, $montant) {
+        $db = getDB();
+        $db->beginTransaction();
+        try {
+            // Get current account balance
+            $stmt = $db->prepare("SELECT compte FROM Fond_Client WHERE id = ?");
+            $stmt->execute([$id]);
+            $current_compte = $stmt->fetchColumn();
+
+            // Update account balance
+            $new_compte = $current_compte + $montant;
+            $stmt = $db->prepare("UPDATE Fond_Client SET compte = ? WHERE id = ?");
+            $stmt->execute([$new_compte, $id]);
+
+            $db->commit();
+            return ['message' => 'Fonds ajoutés avec succès.', 'compte' => $new_compte];
+        } catch (Exception $e) {
+            $db->rollBack();
+            http_response_code(500);
+            return ['error' => 'Erreur lors de l\'ajout des fonds: ' . $e->getMessage()];
+        }
+    }
 }

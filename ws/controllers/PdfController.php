@@ -1,107 +1,94 @@
 <?php
 require_once __DIR__ . '/../../fpdf186/fpdf.php'; // Assurez-vous que le chemin est correct
 require_once __DIR__ . '/../db.php';
-
+require_once __DIR__ . '/../models/Pret.php';
+require_once __DIR__ . '/../models/TypePret.php';
 
 class PdfController {
     public static function generate() {
-        $client_id = intval(Flight::request()->data->client_id);
-        $dest_dir = Flight::request()->data->dest_dir ?? 'public/temp'; // default directory relative to ws/
+        $pret_id = intval(Flight::request()->data->pret_id);
 
-        if ($client_id <= 0) {
+        if ($pret_id <= 0) {
             http_response_code(400);
-            echo json_encode(['error' => 'ID client invalide.']);
-            exit;
-        }
-
-        // Validate dest_dir to prevent directory traversal
-        if (preg_match('/\.\./', $dest_dir)) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Chemin de destination invalide.']);
+            echo json_encode(['error' => 'ID de prêt invalide.']);
             exit;
         }
 
         $pdo = getDB();
 
-        // Récupération des informations du client
-        $sqlClient = "
-            SELECT c.nom AS client_nom, a.nom AS assurance_nom, c.compte
-            FROM Client c
-            LEFT JOIN Assurance a ON c.id_assurance = a.id
-            WHERE c.id = :id
+        // Récupération des informations du prêt
+        $sqlPret = "
+            SELECT p.montant, p.date_demande, p.assurance, p.delai_premier_remboursement, p.duree_mois,
+                   c.nom AS client_nom, tp.nom AS type_pret_nom, tp.taux AS type_pret_taux
+            FROM Pret p
+            JOIN Client c ON p.id_client = c.id
+            JOIN TypePret tp ON p.id_type_pret = tp.id
+            WHERE p.id = :id
         ";
-        $stmtClient = $pdo->prepare($sqlClient);
-        $stmtClient->execute(['id' => $client_id]);
-        $client = $stmtClient->fetch();
-        if (!$client) {
+        $stmtPret = $pdo->prepare($sqlPret);
+        $stmtPret->execute(['id' => $pret_id]);
+        $pret = $stmtPret->fetch(PDO::FETCH_ASSOC);
+
+        if (!$pret) {
             http_response_code(404);
-            echo json_encode(['error' => 'Client non trouvé.']);
+            echo json_encode(['error' => 'Prêt non trouvé.']);
             exit;
         }
 
-        // Récupération des prêts du client
-        $sqlLoans = "
-            SELECT p.montant, r.montant_par_moi, p.date_demande, r.date_debut, r.nombre_mois
-            FROM Pret p
-            JOIN Remboursement r ON r.id_Pret = p.id
-            WHERE p.id_client = :id
-        ";
-        $stmtLoans = $pdo->prepare($sqlLoans);
-        $stmtLoans->execute(['id' => $client_id]);
-        $loans = $stmtLoans->fetchAll();
+        // Simulation du tableau d'amortissement
+        $tableau_amortissement = Pret::simulerPret(
+            $pret['montant'],
+            $pret['type_pret_taux'],
+            $pret['duree_mois'],
+            $pret['assurance'],
+            $pret['delai_premier_remboursement']
+        );
+
+        if (isset($tableau_amortissement['error'])) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Erreur lors de la simulation du prêt: ' . $tableau_amortissement['error']]);
+            exit;
+        }
 
         // Génération du PDF
-        $fileName = 'rapport_pret_client_' . $client_id . '.pdf';
-        $filePath = __DIR__ . '../public/temp' . $dest_dir . '/' . $fileName;
-
-        // Remove directory creation since PDF is output directly to browser
-        // $dir = dirname($filePath);
-        // if (!is_dir($dir)) {
-        //     // Use recursive mkdir and check for errors
-        //     if (!mkdir($dir, 0777, true) && !is_dir($dir)) {
-        //         http_response_code(500);
-        //         echo json_encode(['error' => 'Impossible de créer le répertoire de destination.']);
-        //         exit;
-        //     }
-        // }
+        $fileName = 'tableau_amortissement_pret_' . $pret_id . '.pdf';
 
         $pdf = new FPDF();
         $pdf->AddPage();
         $pdf->SetFont('Arial', 'B', 16);
-        $pdf->Cell(0, 10, 'banque be leaza', 0, 1, 'C');
-        $pdf->SetFont('Arial', '', 12);
-        $pdf->Cell(0, 8, 'Nom du client : ' . $client['client_nom'], 0, 1);
-        $pdf->Cell(0, 8, 'Assurance : ' . ($client['assurance_nom'] ?? 'N/A'), 0, 1);
-        $pdf->Cell(0, 8, 'Compte : ' . number_format($client['compte'], 2, ',', ' '), 0, 1);
-        $pdf->Ln(5);
-        $pdf->SetFont('Arial', 'B', 14);
-        $pdf->Cell(0, 8, 'Liste des prêts', 0, 1);
+        $pdf->Cell(0, 10, 'Tableau d\'Amortissement', 0, 1, 'C');
+        $pdf->Ln(10);
 
-        $pdf->SetFont('Arial', 'B', 12);
-        $headers = ['Montant', 'Remb. / mois', 'Date demande', 'Début remb.', 'Nb mois'];
-        $widths  = [30, 40, 40, 40, 20];
+        $pdf->SetFont('Arial', '', 12);
+        $pdf->Cell(0, 8, 'Client: ' . $pret['client_nom'], 0, 1);
+        $pdf->Cell(0, 8, 'Type de Prêt: ' . $pret['type_pret_nom'], 0, 1);
+        $pdf->Cell(0, 8, 'Montant du Prêt: ' . number_format($pret['montant'], 2, ',', ' ') . ' €', 0, 1);
+        $pdf->Cell(0, 8, 'Taux Annuel: ' . $pret['type_pret_taux'] . '%', 0, 1);
+        $pdf->Cell(0, 8, 'Durée: ' . $pret['duree_mois'] . ' mois', 0, 1);
+        $pdf->Cell(0, 8, 'Assurance: ' . $pret['assurance'] . '%', 0, 1);
+        $pdf->Cell(0, 8, 'Délai avant 1er Remboursement: ' . $pret['delai_premier_remboursement'] . ' mois', 0, 1);
+        $pdf->Ln(10);
+
+        $pdf->SetFont('Arial', 'B', 10);
+        $headers = ['Période', 'Solde Début', 'Annuité', 'Intérêt Payé', 'Principal Payé', 'Solde Fin'];
+        $widths  = [20, 30, 30, 30, 30, 30];
         foreach ($headers as $i => $h) {
-            $pdf->Cell($widths[$i], 8, $h, 1);
+            $pdf->Cell($widths[$i], 7, $h, 1, 0, 'C');
         }
         $pdf->Ln();
 
-        $pdf->SetFont('Arial', '', 12);
-        foreach ($loans as $loan) {
-            $pdf->Cell($widths[0], 8, number_format($loan['montant'], 2, ',', ' '), 1);
-            $pdf->Cell($widths[1], 8, number_format($loan['montant_par_moi'], 2, ',', ' '), 1);
-            $pdf->Cell($widths[2], 8, $loan['date_demande'], 1);
-            $pdf->Cell($widths[3], 8, $loan['date_debut'], 1);
-            $pdf->Cell($widths[4], 8, $loan['nombre_mois'], 1);
+        $pdf->SetFont('Arial', '', 9);
+        foreach ($tableau_amortissement as $ligne) {
+            $pdf->Cell($widths[0], 6, $ligne['periode'], 1, 0, 'C');
+            $pdf->Cell($widths[1], 6, number_format($ligne['solde_debut'], 2, ',', ' '), 1, 0, 'R');
+            $pdf->Cell($widths[2], 6, number_format($ligne['annuite'], 2, ',', ' '), 1, 0, 'R');
+            $pdf->Cell($widths[3], 6, number_format($ligne['interet_paye'], 2, ',', ' '), 1, 0, 'R');
+            $pdf->Cell($widths[4], 6, number_format($ligne['principal_paye'], 2, ',', ' '), 1, 0, 'R');
+            $pdf->Cell($widths[5], 6, number_format($ligne['solde_fin'], 2, ',', ' '), 1, 0, 'R');
             $pdf->Ln();
         }
 
-        // Output PDF directly to browser for download, allowing user to choose destination directory
         $pdf->Output('D', $fileName);
         exit;
-
-http_response_code(405);
-echo json_encode(['error' => 'Méthode non autorisée.']);
-    
-
     }
 }

@@ -1,116 +1,95 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Inscription</title>
-    <style>
-      body {
-        font-family: sans-serif;
-        padding: 20px;
-        display: grid;
-        grid-template-columns: 1fr;
-        grid-gap: 40px;
-        justify-items: center;
-      }
-      input,
-      select,
-      button {
-        margin: 5px;
-        padding: 8px;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-      }
-      button {
-        cursor: pointer;
-        background-color: #007bff;
-        color: white;
-        border: none;
-      }
-      button:hover {
-        background-color: #0056b3;
-      }
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 20px;
-      }
-      th,
-      td {
-        border: 1px solid #ccc;
-        padding: 8px;
-        text-align: left;
-      }
-      th {
-        background-color: #f2f2f2;
-      }
-      h1,
-      h2 {
-        color: #333;
-      }
-      .section {
-        padding: 20px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        background-color: #fafafa;
-        width: 50%;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="login-section" class="section">
-      <h2>Inscription Client</h2>
-      <input type="text" id="client-nom" placeholder="Nom d'utilisateur" />
-      <input type="password" id="client-mdp" placeholder="Mot de passe" />
-      <button onclick="inscriptionClient()">S'inscrire</button>
-    </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription Client - Banque BeLeaza</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="/" class="logo">Banque<span>BeLeaza</span></a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Accueil</a></li>
+                    <li><a href="/login.html">Espace Admin</a></li>
+                    <li><a href="/client.html">Espace Client</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-    <div>
-      <a href="client.html"><button type="submit">Log in</button></a>
-    </div>
+    <main class="container mt-5 pt-5">
+        <div class="login-box">
+            <h2>Inscription Client</h2>
+            <form id="inscription-form">
+                <div class="mb-3">
+                    <label for="client-nom" class="form-label">Nom d'utilisateur</label>
+                    <input type="text" id="client-nom" class="form-control" placeholder="Nom d'utilisateur" required>
+                </div>
+                <div class="mb-3">
+                    <label for="client-mdp" class="form-label">Mot de passe</label>
+                    <input type="password" id="client-mdp" class="form-control" placeholder="Mot de passe" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
+                <p class="text-center mt-3">Déjà un compte? <a href="client.html">Connectez-vous</a></p>
+            </form>
+        </div>
+    </main>
 
-    <div>
-      <a href="login.html"><button type="submit">Partie Admin</button></a>
-    </div>
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-cols">
+                <div>
+                    <h4>À Propos</h4>
+                    <p>Votre partenaire financier de confiance.</p>
+                </div>
+                <div>
+                    <h4>Contact</h4>
+                    <p>Email: contact@beleaza.com</p>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 Banque BeLeaza. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      const apiBase = "http://localhost:8000";
-      let currentClientId = null;
+        const apiBase = "http://localhost:8000";
 
-      function ajax(method, url, data, callback) {
-        const xhr = new XMLHttpRequest();
-        xhr.open(method, apiBase + url, true);
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.onreadystatechange = () => {
-          if (xhr.readyState === 4) {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              callback(JSON.parse(xhr.responseText));
-            } else {
-              alert(`Erreur: ${xhr.responseText}`);
+        document.getElementById('inscription-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nom = document.getElementById("client-nom").value;
+            const mdp = document.getElementById("client-mdp").value;
+
+            if (!nom || !mdp) {
+                alert("Veuillez remplir tous les champs.");
+                return;
             }
-          }
-        };
-        xhr.send(JSON.stringify(data));
-      }
 
-      function inscriptionClient() {
-        const nom = document.getElementById("client-nom").value;
-        const mdp = document.getElementById("client-mdp").value;
-
-        if (!nom || !mdp) {
-          alert("Veuillez remplir tous les champs.");
-          return;
-        }
-        ajax("POST", "/clients", { nom, mdp }, function (data) {
-          if (data.nom != null && data.mdp != null) {
-            document.getElementById("client-nom").value = "";
-            document.getElementById("client-mdp").value = "";
-            alert("Inscription réussie !");
-            window.location.href = "client.html";
-          } else {
-            alert("Échec de la connexion : " + data.error);
-          }
+            fetch(apiBase + '/clients', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nom, mdp })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.id) {
+                    alert("Inscription réussie !");
+                    window.location.href = "client.html";
+                } else {
+                    alert("Échec de l'inscription : " + (data.error || 'Une erreur est survenue.'));
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue.');
+            });
         });
-      }
     </script>
-  </body>
+</body>
 </html>

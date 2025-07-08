@@ -19,4 +19,17 @@ class ClientController {
         Flight::json($result);
     }
 
+    public static function getFondsClient($id) {
+        $fonds = Client::getCompte($id);
+        Flight::json($fonds);
+    }
+
+    public static function addFondsClient($id) {
+        $data = Flight::request()->data;
+        $montant = $data->compte;
+        $result = Client::addCompte($id, $montant);
+        Flight::json($result);
+    }
 }
+
+

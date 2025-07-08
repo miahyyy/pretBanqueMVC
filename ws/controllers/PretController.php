@@ -32,4 +32,26 @@ class PretController {
         $result = Pret::annuler($id);
         Flight::json($result);
     }
+
+    public static function valider($id) {
+        $result = Pret::valider($id);
+        Flight::json($result);
+    }
+
+    public static function simuler() {
+        $data = Flight::request()->data;
+        $montant_pret = $data->montant_pret;
+        $taux_annuel = $data->taux_annuel;
+        $duree_mois = $data->duree_mois;
+        $assurance_pourcentage = isset($data->assurance_pourcentage) ? $data->assurance_pourcentage : 0;
+        $delai_mois = isset($data->delai_mois) ? $data->delai_mois : 0;
+
+        $simulation = Pret::simulerPret($montant_pret, $taux_annuel, $duree_mois, $assurance_pourcentage, $delai_mois);
+
+        if (isset($simulation['error'])) {
+            Flight::json($simulation, 400);
+        } else {
+            Flight::json($simulation);
+        }
+    }
 }

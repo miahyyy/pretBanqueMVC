@@ -2,102 +2,193 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <title>Demande de Prêt</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Espace Client - Banque BeLeaza</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
     <style>
-      body {
-        font-family: sans-serif;
-        padding: 20px;
-        display: grid;
-        grid-template-columns: 1fr;
-        grid-gap: 40px;
-        justify-items: center;
-      }
-      input,
-      select,
-      button {
-        margin: 5px;
-        padding: 8px;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-      }
-      button {
+      #table-prets tbody tr:hover {
         cursor: pointer;
-        background-color: #007bff;
-        color: white;
-        border: none;
-      }
-      button:hover {
-        background-color: #0056b3;
-      }
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 20px;
-      }
-      th,
-      td {
-        border: 1px solid #ccc;
-        padding: 8px;
-        text-align: left;
-      }
-      th {
-        background-color: #f2f2f2;
-      }
-      h1,
-      h2 {
-        color: #333;
-      }
-      .section {
-        padding: 20px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        background-color: #fafafa;
-        width: 50%;
+        background-color: #f0f0f0;
       }
     </style>
   </head>
   <body>
-    <div id="login-section" class="section">
-      <h2>Connexion Client</h2>
-      <input type="text" id="client-nom" placeholder="Nom d'utilisateur" />
-      <input type="password" id="client-mdp" placeholder="Mot de passe" />
-      <button onclick="loginClient()">Se connecter</button>
-      <a href="login_client.html"><button type="submit">S'inscrire</button></a>
-    </div>
+    <header class="site-header">
+      <div class="container">
+        <a href="/" class="logo">Banque<span>BeLeaza</span></a>
+        <nav class="main-nav">
+          <ul>
+            <li><a href="/">Accueil</a></li>
+            <li><a href="/login.html">Espace Admin</a></li>
+            <li><a href="/client.html">Espace Client</a></li>
+            <li><a href="/amortization.html">liste_prevision</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
 
-    <div id="loan-application-section" class="section" style="display: none">
-      <h2 id="welcome-message"></h2>
+    <main class="container mt-5 pt-5">
+      <div id="login-section" class="login-box">
+        <h2>Connexion Client</h2>
+        <form id="login-form">
+          <div class="mb-3">
+            <label for="client-nom" class="form-label">Nom d'utilisateur</label>
+            <input
+              type="text"
+              id="client-nom"
+              class="form-control"
+              placeholder="Nom d'utilisateur"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="client-mdp" class="form-label">Mot de passe</label>
+            <input
+              type="password"
+              id="client-mdp"
+              class="form-control"
+              placeholder="Mot de passe"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            Se connecter
+          </button>
+          <p class="text-center mt-3">
+            Pas de compte? <a href="login_client.html">Inscrivez-vous</a>
+          </p>
+        </form>
+      </div>
 
-      <button onclick="genererPDF()">📄 Générer PDF</button>
+      <div id="loan-application-section" style="display: none">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 id="welcome-message"></h2>
+          <button onclick="logoutClient()" class="btn btn-danger">
+            Déconnexion
+          </button>
+        </div>
 
-      <button onclick="logoutClient()" style="float: right">Déconnexion</button>
-      <h2>Demander un Prêt</h2>
-      <select id="pret-type"></select>
-      <input type="number" id="pret-montant" placeholder="Montant du prêt" />
-      <button onclick="demanderPret()">Demander un prêt</button>
-    </div>
+        <div class="section p-3 mb-4 bg-light rounded-3">
+          <p>Fonds actuels: <b id="fonds-actuels">...</b></p>
+          <h2>Demander un Prêt</h2>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="pret-type" class="form-label">Type de prêt</label>
+              <select id="pret-type" class="form-select"></select>
+            </div>
+            <div class="col-md-6">
+              <label for="pret-montant" class="form-label"
+                >Montant du prêt</label
+              >
+              <input
+                type="number"
+                id="pret-montant"
+                class="form-control"
+                placeholder="Montant du prêt"
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="pret-duree" class="form-label">Durée (mois)</label>
+              <input
+                type="number"
+                id="pret-duree"
+                class="form-control"
+                placeholder="Durée (mois)"
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="pret-assurance" class="form-label"
+                >Assurance (%)</label
+              >
+              <input
+                type="number"
+                id="pret-assurance"
+                class="form-control"
+                value="0"
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="pret-delai" class="form-label"
+                >Délai 1er Remboursement (mois)</label
+              >
+              <input
+                type="number"
+                id="pret-delai"
+                class="form-control"
+                value="0"
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="pret-date" class="form-label">Date de début</label>
+              <input type="date" id="pret-date" class="form-control" />
+            </div>
+          </div>
+          <div class="mt-3">
+            <button onclick="simulerPret()" class="btn btn-info">
+              Simuler
+            </button>
+            <button onclick="demanderPret()" class="btn btn-primary">
+              Demander
+            </button>
+            <button onclick="saveSimulation()" class="btn btn-success">
+              Sauvegarder la Simulation
+            </button>
+          </div>
+          <div id="simulation-results" class="mt-4"></div>
+        </div>
+      </div>
 
-    <div id="loan-list-section" class="section" style="display: none">
-      <h2>Mes Demandes de Prêts</h2>
-      <table id="table-prets">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Type</th>
-            <th>Montant</th>
-            <th>Date</th>
-            <th>Statut</th>
-            <th>Approbation</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+      <div
+        id="loan-list-section"
+        class="section p-3 bg-light rounded-3"
+        style="display: none"
+      >
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2>Mes Demandes de Prêts</h2>
+          <button onclick="genererPDF()" class="btn btn-secondary">
+            📄 Générer PDF
+          </button>
+        </div>
+        <table id="table-prets" class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Montant</th>
+              <th>Date</th>
+              <th>Statut</th>
+              <th>Actions</th>
+              <th>Remboursement</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </main>
 
-    <div>
-      <a href="login.html"><button type="submit">Partie Admin</button></a>
-    </div>
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-cols">
+          <div>
+            <h4>À Propos</h4>
+            <p>Votre partenaire financier de confiance.</p>
+          </div>
+          <div>
+            <h4>Contact</h4>
+            <p>Email: contact@beleaza.com</p>
+          </div>
+        </div>
+        <div class="copyright">
+          <p>&copy; 2025 Banque BeLeaza. Tous droits réservés.</p>
+        </div>
+      </div>
+    </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       const apiBase = "http://localhost:8000";
       let currentClientId = null;
@@ -109,43 +200,83 @@
         xhr.onreadystatechange = () => {
           if (xhr.readyState === 4) {
             if (xhr.status >= 200 && xhr.status < 300) {
-              callback(JSON.parse(xhr.responseText));
+              try {
+                callback(JSON.parse(xhr.responseText));
+              } catch (e) {
+                callback(xhr.responseText);
+              }
             } else {
               alert(`Erreur: ${xhr.responseText}`);
             }
           }
         };
         xhr.send(JSON.stringify(data));
-
-        // const encoded = Object.keys(data)
-        //   .map((k) => encodeURIComponent(k) + "=" + encodeURIComponent(data[k]))
-        //   .join("&");
-
-        // xhr.send(encoded);
       }
 
-      function loginClient() {
-        const nom = document.getElementById("client-nom").value;
-        const mdp = document.getElementById("client-mdp").value;
-        ajax("POST", "/client/login", { nom, mdp }, (data) => {
-          if (data.id) {
-            currentClientId = data.id;
-            document.getElementById("login-section").style.display = "none";
-            document.getElementById("loan-application-section").style.display =
-              "block";
-            document.getElementById("loan-list-section").style.display =
-              "block";
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const nom = document.getElementById("client-nom").value;
+          const mdp = document.getElementById("client-mdp").value;
+          ajax("POST", "/client/login", { nom, mdp }, (data) => {
+            if (data.id) {
+              currentClientId = data.id;
+              document.getElementById("login-section").style.display = "none";
+              document.getElementById(
+                "loan-application-section"
+              ).style.display = "block";
+              document.getElementById("loan-list-section").style.display =
+                "block";
+              document.getElementById(
+                "welcome-message"
+              ).textContent = `Bienvenue, ${data.nom}`;
+              initialiserApp();
+            } else {
+              alert("Échec de la connexion.");
+            }
+          });
+        });
+
+      function chargerFondsClient() {
+        if (!currentClientId) return;
+        ajax("GET", `/ef/fonds-client/${currentClientId}`, null, (data) => {
+          if (data.compte !== undefined) {
             document.getElementById(
-              "welcome-message"
-            ).textContent = `Bienvenue, ${data.nom}`;
-            initialiserApp();
-          } else {
-            alert("Échec de la connexion.");
+              "fonds-actuels"
+            ).textContent = `${data.compte} €`;
           }
         });
       }
 
-      // --- Types de Prêt ---
+      function ajouterFondsClient() {
+        const montant = parseFloat(
+          document.getElementById("compte-ajout").value
+        );
+        if (isNaN(montant) || montant <= 0) {
+          alert("Veuillez entrer un montant valide à ajouter.");
+          return;
+        }
+        if (!currentClientId) {
+          alert("Client non connecté.");
+          return;
+        }
+        ajax(
+          "POST",
+          `/ef/fonds-client/${currentClientId}`,
+          { compte: montant },
+          (data) => {
+            if (data.message) {
+              chargerFondsClient();
+              document.getElementById("compte-ajout").value = "";
+              alert(data.message);
+            } else if (data.error) {
+              alert(data.error);
+            }
+          }
+        );
+      }
+
       function chargerTypesPret() {
         ajax("GET", "/types-pret", null, (data) => {
           const select = document.getElementById("pret-type");
@@ -156,7 +287,6 @@
         });
       }
 
-      // --- Prêts ---
       function chargerPrets() {
         if (!currentClientId) return;
         ajax("GET", `/prets/client/${currentClientId}`, null, (data) => {
@@ -165,11 +295,19 @@
           data.forEach((p) => {
             let actions = "";
             if (p.statut === "EN ATTENTE") {
-              actions = `<button onclick="annulerPret(${p.id})">Annuler</button>`;
+              actions = `<button class="btn btn-warning btn-sm" onclick="annulerPret(${p.id})">Annuler</button>`;
             } else {
               actions = p.statut;
             }
-            tbody.innerHTML += `<tr><td>${p.id}</td><td>${p.type_pret}</td><td>${p.montant} €</td><td>${p.date_demande}</td><td>${p.statut}</td><td>${actions}</td></tr>`;
+            const row = tbody.insertRow();
+            row.dataset.pretId = p.id;
+            row.innerHTML = `<td>${p.id}</td><td>${p.type_pret}</td><td>${p.montant} €</td><td>${p.date_demande}</td><td>${p.statut}</td><td>${actions}</td><td><button class="btn btn-warning btn-sm" onclick="afficherRemboursement(${p.id}, ${p.montant}, '${p.type_pret}', ${p.duree_mois}, ${p.assurance}, ${p.delai_premier_remboursement})">Voir Remboursement</button></td>`;
+            row.onclick = () => {
+              document
+                .querySelectorAll("#table-prets tbody tr")
+                .forEach((r) => r.classList.remove("table-active"));
+              row.classList.add("table-active");
+            };
           });
         });
       }
@@ -177,14 +315,83 @@
       function demanderPret() {
         if (!currentClientId) return;
         const id_type_pret = document.getElementById("pret-type").value;
+        const date_demande = document.getElementById("pret-date").value;
         const montant = document.getElementById("pret-montant").value;
+        const duree_mois = document.getElementById("pret-duree").value;
+        const assurance = document.getElementById("pret-assurance").value;
+        const delai_premier_remboursement =
+          document.getElementById("pret-delai").value;
+
         ajax(
           "POST",
           "/prets",
-          { id_client: currentClientId, id_type_pret, montant },
+          {
+            id_client: currentClientId,
+            id_type_pret,
+            montant,
+            date_demande,
+            duree_mois,
+            assurance,
+            delai_premier_remboursement,
+          },
           () => {
             chargerPrets();
             document.getElementById("pret-montant").value = "";
+            document.getElementById("pret-date").value = "";
+            document.getElementById("pret-duree").value = "";
+            document.getElementById("pret-assurance").value = "0";
+            document.getElementById("pret-delai").value = "0";
+          }
+        );
+      }
+
+      function simulerPret() {
+        const montant_pret = document.getElementById("pret-montant").value;
+        const duree_mois = document.getElementById("pret-duree").value;
+        const assurance_pourcentage =
+          document.getElementById("pret-assurance").value;
+        const delai_mois = document.getElementById("pret-delai").value;
+        const taux_annuel = document
+          .getElementById("pret-type")
+          .options[
+            document.getElementById("pret-type").selectedIndex
+          ].text.match(/\((\d+\.?\d*)%\)/)[1];
+
+        if (!montant_pret || !duree_mois || !taux_annuel) {
+          alert(
+            "Veuillez remplir le montant, la durée et sélectionner un type de prêt pour la simulation."
+          );
+          return;
+        }
+
+        ajax(
+          "POST",
+          "/prets/simuler",
+          {
+            montant_pret,
+            taux_annuel,
+            duree_mois,
+            assurance_pourcentage,
+            delai_mois,
+          },
+          (data) => {
+            lastSimulationData = data;
+            let simulationHtml = "<h3>Tableau d'Amortissement</h3>";
+            simulationHtml +=
+              "<table class='table table-sm'><thead><tr><th>Période</th><th>Solde Début</th><th>Annuité</th><th>Intérêt Payé</th><th>Principal Payé</th><th>Solde Fin</th></tr></thead><tbody>";
+            data.forEach((row) => {
+              simulationHtml += `<tr>
+                        <td>${row.periode}</td>
+                        <td>${row.solde_debut.toFixed(2)} €</td>
+                        <td>${row.annuite.toFixed(2)} €</td>
+                        <td>${row.interet_paye.toFixed(2)} €</td>
+                        <td>${row.principal_paye.toFixed(2)} €</td>
+                        <td>${row.solde_fin.toFixed(2)} €</td>
+                    </tr>`;
+            });
+            simulationHtml += "</tbody></table>";
+            document.getElementById("simulation-results").innerHTML =
+              simulationHtml;
           }
         );
       }
@@ -193,10 +400,64 @@
         ajax("POST", `/prets/${id}/annuler`, {}, chargerPrets);
       }
 
-      // --- Initialisation ---
+      let lastSimulationData = null;
+
+      function saveSimulation() {
+        if (!currentClientId || !lastSimulationData) {
+          alert("Veuillez d'abord simuler un prêt.");
+          return;
+        }
+
+        const id_type_pret = document.getElementById("pret-type").value;
+
+        ajax(
+          "POST",
+          "/prets/simulation/save",
+          {
+            id_client: currentClientId,
+            id_type_pret: id_type_pret,
+            simulation: lastSimulationData,
+          },
+          (data) => {
+            if (data.success) {
+              alert("Simulation sauvegardée avec succès.");
+            } else {
+              alert("Erreur lors de la sauvegarde de la simulation.");
+            }
+          }
+        );
+      }
+
+      function genererPDF() {
+        const selectedRow = document.querySelector(
+          "#table-prets tbody tr.table-active"
+        );
+        if (!selectedRow) {
+          alert("Veuillez sélectionner un prêt dans la liste.");
+          return;
+        }
+        const pret_id = selectedRow.dataset.pretId;
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = `${apiBase}/pdf/generate`;
+        form.target = "_blank";
+
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "pret_id";
+        input.value = pret_id;
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+      }
+
       function initialiserApp() {
         chargerTypesPret();
         chargerPrets();
+        chargerFondsClient();
       }
 
       function logoutClient() {
@@ -207,22 +468,6 @@
         document.getElementById("loan-list-section").style.display = "none";
         document.getElementById("client-nom").value = "";
         document.getElementById("client-mdp").value = "";
-      }
-
-      function genererPDF() {
-        if (!currentClientId) return;
-        ajax(
-          "POST",
-          "/pdf/generate",
-          { client_id: currentClientId },
-          function (response) {
-            if (response.success) {
-              window.open(response.url, "_blank");
-            } else {
-              alert("Erreur : " + response.error);
-            }
-          }
-        );
       }
     </script>
   </body>

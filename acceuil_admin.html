@@ -2,137 +2,218 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <title>Gestion de Prêts Bancaires</title>
-    <style>
-      body {
-        font-family: sans-serif;
-        padding: 20px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-gap: 40px;
-      }
-      input,
-      select,
-      button {
-        margin: 5px;
-        padding: 8px;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-      }
-      button {
-        cursor: pointer;
-        background-color: #007bff;
-        color: white;
-        border: none;
-      }
-      button:hover {
-        background-color: #0056b3;
-      }
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 20px;
-      }
-      th,
-      td {
-        border: 1px solid #ccc;
-        padding: 8px;
-        text-align: left;
-      }
-      th {
-        background-color: #f2f2f2;
-      }
-      h1,
-      h2 {
-        color: #333;
-      }
-      .section {
-        padding: 20px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        background-color: #fafafa;
-      }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tableau de Bord Admin - Banque BeLeaza</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="section">
-      <h2>Établissement Financier</h2>
-      <p>Fonds actuels: <b id="fonds-actuels">...</b></p>
-      <input type="number" id="montant-ajout" placeholder="Montant à ajouter" />
-      <input type="text" id="description" placeholder="Description" />
-      <button onclick="ajouterFonds()">Ajouter des fonds</button>
+    <header class="site-header">
+      <div class="container">
+        <a href="/" class="logo">Banque<span>BeLeaza</span></a>
+        <nav class="main-nav">
+          <ul>
+            <li><a href="/">Accueil</a></li>
+            <li><a href="login.html">Espace Admin</a></li>
+            <li><a href="client.html">Espace Client</a></li>
+            <li><a href="amortization.html">liste_prevision</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
 
-      <table id="table-fonds">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Montant</th>
-            <th>Type</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <main class="container-fluid mt-5 pt-5">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="section p-3 mb-4 bg-light rounded-3">
+            <h2>Établissement Financier</h2>
+            <p>Fonds actuels: <b id="fonds-actuels">...</b></p>
+            <div class="input-group mb-3">
+              <input
+                type="number"
+                id="montant-ajout"
+                class="form-control"
+                placeholder="Montant à ajouter"
+              />
+              <input
+                type="text"
+                id="description"
+                class="form-control"
+                placeholder="Description"
+              />
+              <button class="btn btn-primary" onclick="ajouterFonds()">
+                Ajouter
+              </button>
+            </div>
+            <table id="table-fonds" class="table table-striped">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Montant</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="section p-3 mb-4 bg-light rounded-3">
+            <h2>Types de Prêt</h2>
+            <div class="input-group mb-3">
+              <input
+                type="text"
+                id="type-nom"
+                class="form-control"
+                placeholder="Nom du type de prêt"
+              />
+              <input
+                type="number"
+                id="type-taux"
+                class="form-control"
+                placeholder="Taux d'intérêt (%)"
+              />
+              <button class="btn btn-primary" onclick="ajouterTypePret()">
+                Ajouter
+              </button>
+            </div>
+            <table id="table-types-pret" class="table table-striped">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nom</th>
+                  <th>Taux (%)</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-    <div class="section">
-      <h2>Types de Prêt</h2>
-      <input type="text" id="type-nom" placeholder="Nom du type de prêt" />
-      <input type="number" id="type-taux" placeholder="Taux d'intérêt (%)" />
-      <button onclick="ajouterTypePret()">Ajouter un type</button>
-      <table id="table-types-pret">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nom</th>
-            <th>Taux (%)</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="section p-3 mb-4 bg-light rounded-3">
+            <h2>Clients</h2>
+            <table id="table-clients" class="table table-striped">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nom</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-    <div class="section">
-      <h2>Clients</h2>
-      <!-- <input type="text" id="client-nom" placeholder="Nom du client" />
-      <input type="password" id="client-mdp" placeholder="Mot de passe du client" />
-      <button onclick="ajouterClient()">Ajouter un client</button> -->
-      <table id="table-clients">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nom</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="section p-3 mb-4 bg-light rounded-3">
+            <h2>Gestion des Prêts</h2>
+            <table id="table-prets" class="table table-striped">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Client</th>
+                  <th>Type</th>
+                  <th>Montant</th>
+                  <th>Date</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-    <div class="section">
-      <h2>Gestion des Prêts</h2>
-      <!-- <select id="pret-client"></select> -->
-      <select id="pret-type"></select>
-      <!-- <input type="number" id="pret-montant" placeholder="Montant du prêt" />
-      <button onclick="demanderPret()">Demander un prêt</button> -->
-      <table id="table-prets">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Client</th>
-            <th>Type</th>
-            <th>Montant</th>
-            <th>Date</th>
-            <th>Approbation</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="section p-3 mb-4 bg-light rounded-3">
+            <h2>Simuler un Prêt</h2>
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label for="sim-montant" class="form-label">Montant</label>
+                <input
+                  type="number"
+                  id="sim-montant"
+                  class="form-control"
+                  placeholder="Montant du prêt"
+                />
+              </div>
+              <div class="col-md-3">
+                <label for="sim-type-pret" class="form-label"
+                  >Type de Prêt</label
+                >
+                <select id="sim-type-pret" class="form-select"></select>
+              </div>
+              <div class="col-md-2">
+                <label for="sim-duree" class="form-label">Durée (mois)</label>
+                <input
+                  type="number"
+                  id="sim-duree"
+                  class="form-control"
+                  placeholder="Durée"
+                />
+              </div>
+              <div class="col-md-2">
+                <label for="sim-assurance" class="form-label"
+                  >Assurance (%)</label
+                >
+                <input
+                  type="number"
+                  id="sim-assurance"
+                  class="form-control"
+                  value="0"
+                />
+              </div>
+              <div class="col-md-2">
+                <label for="sim-delai" class="form-label">Délai (mois)</label>
+                <input
+                  type="number"
+                  id="sim-delai"
+                  class="form-control"
+                  value="0"
+                />
+              </div>
+              <div class="col-12">
+                <button onclick="simulerPretAdmin()" class="btn btn-info">
+                  Simuler
+                </button>
+              </div>
+            </div>
+            <div id="simulation-results-admin" class="mt-4"></div>
+          </div>
+        </div>
+      </div>
+    </main>
 
-    <div>
-      <a href="client.html"><button type="submit">Partie Client</button></a>
-    </div>
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-cols">
+          <div>
+            <h4>À Propos</h4>
+            <p>omena vola ianao fa calme</p>
+          </div>
+          <div>
+            <h4>Contact</h4>
+            <p>Email: contact@beleaza.com</p>
+          </div>
+        </div>
+        <div class="copyright">
+          <p>&copy; 2025 Banque BeLeaza. Tous droits réservés.</p>
+        </div>
+      </div>
+    </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       const apiBase = "http://localhost:8000";
 
@@ -152,17 +233,12 @@
         xhr.send(JSON.stringify(data));
       }
 
-      // --- Établissement Financier
       function chargerFonds() {
         ajax("GET", "/ef/fonds", null, (data) => {
           document.getElementById(
             "fonds-actuels"
           ).textContent = `${data.fond} €`;
-          //document.getElementById("description").textContent = `${data.description}`;
         });
-      }
-
-      function historiqueFonds() {
         ajax("GET", "/ef/histo-fonds", null, function (data) {
           const tbody = document.querySelector("#table-fonds tbody");
           tbody.innerHTML = "";
@@ -175,29 +251,22 @@
       function ajouterFonds() {
         const montant = document.getElementById("montant-ajout").value;
         const description = document.getElementById("description").value;
-        ajax(
-          "POST",
-          "/ef/fonds",
-          { montant: montant, description: description },
-          (data) => {
-            chargerFonds();
-            historiqueFonds();
-            document.getElementById("montant-ajout").value = "";
-            document.getElementById("description").value = "";
-          }
-        );
+        ajax("POST", "/ef/fonds", { montant, description }, () => {
+          chargerFonds();
+          document.getElementById("montant-ajout").value = "";
+          document.getElementById("description").value = "";
+        });
       }
 
-      // --- Types de Prêt ---
       function chargerTypesPret() {
         ajax("GET", "/types-pret", null, (data) => {
           const tbody = document.querySelector("#table-types-pret tbody");
-          const select = document.getElementById("pret-type");
+          const selectSim = document.getElementById("sim-type-pret");
           tbody.innerHTML = "";
-          select.innerHTML = "";
+          selectSim.innerHTML = "";
           data.forEach((t) => {
             tbody.innerHTML += `<tr><td>${t.id}</td><td>${t.nom}</td><td>${t.taux}</td></tr>`;
-            select.innerHTML += `<option value="${t.id}">${t.nom} (${t.taux}%)</option>`;
+            selectSim.innerHTML += `<option value="${t.id}" data-taux="${t.taux}">${t.nom} (${t.taux}%)</option>`;
           });
         });
       }
@@ -212,31 +281,16 @@
         });
       }
 
-      // --- Clients ---
       function chargerClients() {
         ajax("GET", "/clients", null, (data) => {
           const tbody = document.querySelector("#table-clients tbody");
-          //const select = document.getElementById("pret-client");
           tbody.innerHTML = "";
-          // Removed usage of select since it is undefined
           data.forEach((c) => {
             tbody.innerHTML += `<tr><td>${c.id}</td><td>${c.nom}</td></tr>`;
-            //select.innerHTML += `<option value="${c.id}">${c.nom}</option>`;
           });
         });
       }
 
-      // function ajouterClient() {
-      //   const nom = document.getElementById("client-nom").value;
-      //   const mdp = document.getElementById("client-mdp").value;
-      //   ajax("POST", "/clients", { nom }, () => {
-      //     chargerClients();
-      //     document.getElementById("client-nom").value = "";
-      //     document.getElementById("client-mdp").value = "";
-      //   });
-      // }
-
-      // --- Prêts ---
       function chargerPrets() {
         ajax("GET", "/prets", null, (data) => {
           const tbody = document.querySelector("#table-prets tbody");
@@ -244,23 +298,12 @@
           data.forEach((p) => {
             let actions = "";
             if (p.statut === "EN ATTENTE") {
-              actions = `<button onclick="approuverPret(${p.id})">Approuver</button> <button onclick="rejeterPret(${p.id})">Rejeter</button>`;
+              actions = `<button class="btn btn-success btn-sm" onclick="approuverPret(${p.id})">Approuver</button> <button class="btn btn-danger btn-sm" onclick="rejeterPret(${p.id})">Rejeter</button>`;
             } else {
               actions = p.statut;
             }
-            tbody.innerHTML += `<tr><td>${p.id}</td><td>${p.client}</td><td>${p.type_pret}</td><td>${p.montant} €</td><td>${p.date_demande}</td><td>${actions}</td></tr>`;
+            tbody.innerHTML += `<tr><td>${p.id}</td><td>${p.client}</td><td>${p.type_pret}</td><td>${p.montant} €</td><td>${p.date_demande}</td><td>${p.statut}</td><td>${actions}</td></tr>`;
           });
-        });
-      }
-
-      function demanderPret() {
-        const id_client = document.getElementById("pret-client").value;
-        const id_type_pret = document.getElementById("pret-type").value;
-        const montant = document.getElementById("pret-montant").value;
-        ajax("POST", "/prets", { id_client, id_type_pret, montant }, () => {
-          chargerPrets();
-          chargerFonds(); // Recharger les fonds après un prêt
-          document.getElementById("pret-montant").value = "";
         });
       }
 
@@ -275,16 +318,95 @@
         ajax("POST", `/prets/${id}/rejeter`, {}, chargerPrets);
       }
 
-      // --- Initialisation ---
-      function initialiser() {
+      function simulerPretAdmin() {
+        const montant_pret = document.getElementById("sim-montant").value;
+        const duree_mois = document.getElementById("sim-duree").value;
+        const assurance_pourcentage =
+          document.getElementById("sim-assurance").value;
+        const delai_mois = document.getElementById("sim-delai").value;
+
+        const selectSim = document.getElementById("sim-type-pret");
+        const selectedOption = selectSim.options[selectSim.selectedIndex];
+        const taux_annuel = selectedOption ? selectedOption.dataset.taux : null;
+
+        if (!montant_pret || !duree_mois || !taux_annuel) {
+          alert(
+            "Veuillez remplir le montant, la durée et sélectionner un type de prêt pour la simulation."
+          );
+          return;
+        }
+
+        ajax(
+          "POST",
+          "/prets/simuler",
+          {
+            montant_pret,
+            taux_annuel,
+            duree_mois,
+            assurance_pourcentage,
+            delai_mois,
+          },
+          (data) => {
+            if (data.error) {
+              alert("Erreur de simulation: " + data.error);
+              return;
+            }
+            lastAdminSimulationData = data;
+            let simulationHtml = "<h3>Tableau d'Amortissement</h3>";
+            simulationHtml +=
+              "<table class='table table-sm table-bordered'><thead><tr><th>Période</th><th>Solde Début</th><th>Annuité</th><th>Intérêt Payé</th><th>Assurance Payée</th><th>Principal Payé</th><th>Solde Fin</th></tr></thead><tbody>";
+            data.forEach((row) => {
+              simulationHtml += `<tr>
+                            <td>${row.periode}</td>
+                            <td>${row.solde_debut.toFixed(2)} €</td>
+                            <td>${row.annuite.toFixed(2)} €</td>
+                            <td>${row.interet_paye.toFixed(2)} €</td>
+                            <td>${(row.assurance_paye || 0).toFixed(2)} €</td>
+                            <td>${row.principal_paye.toFixed(2)} €</td>
+                            <td>${row.solde_fin.toFixed(2)} €</td>
+                        </tr>`;
+            });
+            simulationHtml += "</tbody></table>";
+
+            document.getElementById("simulation-results-admin").innerHTML =
+              simulationHtml;
+          }
+        );
+      }
+
+      let lastAdminSimulationData = null;
+
+      function saveSimulationAdmin() {
+        if (!lastAdminSimulationData) {
+          alert("Veuillez d'abord simuler un prêt.");
+          return;
+        }
+
+        const id_type_pret = document.getElementById("sim-type-pret").value;
+
+        ajax(
+          "POST",
+          "/prets/simulation/save",
+          {
+            id_type_pret: id_type_pret,
+            simulation: lastAdminSimulationData,
+          },
+          (data) => {
+            if (data.success) {
+              alert("Simulation sauvegardée avec succès.");
+            } else {
+              alert("Erreur lors de la sauvegarde de la simulation.");
+            }
+          }
+        );
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
         chargerFonds();
         chargerTypesPret();
         chargerClients();
         chargerPrets();
-        historiqueFonds();
-      }
-
-      initialiser();
+      });
     </script>
   </body>
 </html>

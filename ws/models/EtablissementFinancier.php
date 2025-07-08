@@ -37,4 +37,45 @@ class EtablissementFinancier {
         $result = $statement->fetchAll(PDO::FETCH_ASSOC);
         return $result;
     }
+
+    public static function getFondsClient($id_client) {
+        $db = getDB();
+        $statement = $db->prepare("SELECT compte FROM Fond_Client WHERE id_client = ?");
+        $statement->execute([$id_client]);
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+        if ($result) {
+            return $result;
+        } else {
+            return ['compte' => 0];
+        }
+    }
+
+    public static function addFondsClient($data) {
+        $db = getDB();
+        if (!isset($data->compte) || !is_numeric($data->compte) || $data->compte <= 0 ) {
+            http_response_code(400);
+            return ['error' => 'Le montant doit être un nombre positif.'];
+        }
+        if (!isset($data->id_client) || !is_numeric($data->id_client) || $data->id_client <= 0) {
+            http_response_code(400);
+            return ['error' => 'ID client invalide.'];
+        }
+
+        // Check if client exists in Fond_Client
+        $checkStmt = $db->prepare("SELECT compte FROM Fond_Client WHERE id_client = ?");
+        $checkStmt->execute([$data->id_client]);
+        $exists = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($exists) {
+            // Update existing record
+            $statement = $db->prepare("UPDATE Fond_Client SET compte = compte + ? WHERE id_client = ?");
+            $statement->execute([$data->compte, $data->id_client]);
+        } else {
+            // Insert new record
+            $statement = $db->prepare("INSERT INTO Fond_Client (compte, id_client) VALUES (?, ?)");
+            $statement->execute([$data->compte, $data->id_client]);
+        }
+
+        return ['message' => 'Fonds ajoutés avec succès.'];
+    }
 }

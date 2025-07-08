@@ -1,127 +1,116 @@
-/* body {
-        font-family: sans-serif;
-        padding: 20px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-gap: 40px;
-      } */
+/* ==================================================
+   style.css  —  Design épuré & responsive
+   Banque Be Leaza  |  Tous les écrans
+   Placez ce fichier dans /styles/style.css
+   ================================================== */
 
-body {
-        font-family: Arial, sans-serif;
-        display: flex;
-        
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: #f2f2f2;
-      }
-      input,
-      select,
-      button {
-        margin: 5px;
-        padding: 8px;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-      }
-      button {
-        cursor: pointer;
-        background-color: #007bff;
-        color: white;
-        border: none;
-      }
-      button:hover {
-        background-color: #0056b3;
-      }
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 20px;
-      }
-      th,
-      td {
-        border: 1px solid #ccc;
-        padding: 8px;
-        text-align: left;
-      }
-      th {
-        background-color: #f2f2f2;
-      }
-      h1,
-      h2 {
-        color: #333;
-      }
-      .section {
-        padding: 20px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        background-color: #fafafa;
-      }
+/* ------------- VARIABLES & RESET ------------- */
+:root {
+    --clr-primary: #004aad;
+    --clr-accent : #00c497;
+    --clr-bg     : #f7f9fc;
+    --clr-text   : #1a1a1a;
+    --radius     : 8px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter','Segoe UI',sans-serif;background:var(--clr-bg);color:var(--clr-text);line-height:1.6}
+a{text-decoration:none;color:inherit}
+ul{list-style:none}
+img{max-width:100%;display:block;height:auto}
+.container{max-width:1200px;margin:0 auto;padding:0 1rem}
 
-      .login-box {
-        background-color: white;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        width: 300px;
-      }
-      .login-box h2 {
-        margin-bottom: 20px;
-        text-align: center;
-      }
-      .login-box label {
-        display: block;
-        margin: 10px 0 5px;
-      }
-      .login-box input {
-        width: 100%;
-        padding: 8px;
-        box-sizing: border-box;
-      }
-      .login-box button {
-        margin-top: 15px;
-        width: 100%;
-        padding: 10px;
-        background-color: #007BFF;
-        color: white;
-        border: none;
-        cursor: pointer;
-        font-size: 16px;
-      }
-      .login-box button:hover {
-        background-color: #0056b3;
-      }
+/* ------------- HEADER (menu fixe) ------------- */
+.site-header{position:fixed;top:0;left:0;width:100%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.08);z-index:1000}
+.site-header .container{display:flex;align-items:center;justify-content:space-between;height:72px}
+.logo{font-size:1.5rem;font-weight:700;color:var(--clr-primary)}
+.logo span{color:var(--clr-accent)}
+.main-nav ul{display:flex;gap:1.5rem}
+.main-nav a{font-weight:500;transition:color .2s}
+.main-nav a:hover{color:var(--clr-accent)}
+.btn-primary,.btn-secondary{display:inline-block;padding:.6rem 1.4rem;border-radius:4px;font-weight:600;transition:.2s}
+.btn-primary{background:var(--clr-primary);color:#fff}
+.btn-primary:hover{background:var(--clr-accent)}
+.btn-secondary{background:transparent;color:var(--clr-primary);border:2px solid var(--clr-primary)}
+.btn-secondary:hover{background:var(--clr-primary);color:#fff}
 
-button {
-        cursor: pointer;
-        background-color: #007bff;
-        color: white;
-        border: none;
-      }
-      button:hover {
-        background-color: #0056b3;
-      }
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 20px;
-      }
-      th,
-      td {
-        border: 1px solid #ccc;
-        padding: 8px;
-        text-align: left;
-      }
-      th {
-        background-color: #f2f2f2;
-      }
-      h1,
-      h2 {
-        color: #333;
-      }
-      .section {
-        padding: 20px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        background-color: #fafafa;
-        width: 50%;
-      }
+/* ------------- HERO --------------------------- */
+.hero{min-height:calc(100vh - 72px);display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(145deg,#f0f4ff 0%,#f1fcf9 100%);padding-top:72px}
+.hero h1{font-size:2.5rem;color:var(--clr-primary);margin-bottom:1rem}
+.hero p{font-size:1.125rem;margin-bottom:2rem}
+
+/* ------------- SECTIONS GÉNÉRIQUES ------------ */
+section{padding:4rem 0}
+.section-title{text-align:center;font-size:2rem;color:var(--clr-primary);margin-bottom:2rem}
+
+/* SERVICES */
+.services .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2rem}
+.card{background:#fff;border-radius:var(--radius);padding:1.5rem;box-shadow:0 4px 10px rgba(0,0,0,.05);transition:transform .2s}
+.card:hover{transform:translateY(-6px)}
+.card h3{margin-bottom:.5rem;color:var(--clr-primary)}
+.card p{margin-bottom:1rem}
+
+/* ABOUT */
+.about .reasons{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:2rem}
+.about .reasons li{background:#fff;padding:1rem;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+
+/* CONTACT */
+.contact{text-align:center}
+
+/* ------------- FOOTER ------------------------- */
+.site-footer{background:#fff;margin-top:4rem}
+.footer-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;padding:3rem 0}
+.footer-cols h4{margin-bottom:.5rem}
+.footer-cols a{color:var(--clr-primary);font-weight:500}
+.footer-cols a:hover{text-decoration:underline}
+.copyright{text-align:center;padding:1rem 0;font-size:.875rem;background:#f0f0f0}
+
+/* ------------- RESPONSIVE --------------------- */
+@media(max-width:768px){
+  .hero h1{font-size:2rem}
+  .main-nav{display:none}/* Ajoutez un burger si besoin */
+}
+
+
+/* ------------- FORMULAIRES -------------------- */
+.login-box {
+    width: 300px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-box h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-box label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.login-box input[type="text"],
+.login-box input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.login-box button:hover {
+    background-color: #0056b3;
+}

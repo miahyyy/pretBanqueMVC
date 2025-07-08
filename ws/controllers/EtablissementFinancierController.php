@@ -18,4 +18,6 @@ class EtablissementFinancierController {
         $result = EtablissementFinancier::historiqueFond($data);
         Flight::json($result);
     }
+
+    
 }

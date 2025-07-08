@@ -33,7 +33,7 @@ CREATE TABLE TypePret (
 CREATE TABLE Assurance (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
-    pourcentage INT
+    pourcentage FLOAT
 );
 
 -- clients
@@ -42,9 +42,16 @@ CREATE TABLE Client (
     nom VARCHAR(255) NOT NULL,
     mdp VARCHAR(255) NOT NULL,
     id_assurance INT DEFAULT NULL,
-    compte FLOAT,
     FOREIGN KEY (id_assurance) REFERENCES Assurance(id)
 );
+
+CREATE TABLE Fond_Client(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    compte FLOAT,
+    id_client INT DEFAULT NULL,
+    FOREIGN KEY (id_client) REFERENCES Client(id)
+);
+
 -- gestion de prêts
 CREATE TABLE Pret (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -52,7 +59,11 @@ CREATE TABLE Pret (
     id_type_pret INT,
     montant DECIMAL(15, 2) NOT NULL,
     date_demande DATE NOT NULL,
-    statut ENUM('EN ATTENTE', 'ACCORDE', 'REFUSE') DEFAULT 'EN ATTENTE',
+    statut ENUM('EN ATTENTE', 'ACCORDE', 'REFUSE', 'ANNULE') DEFAULT 'EN ATTENTE',
+    assurance DECIMAL(5, 3) DEFAULT 0.00,
+    delai_premier_remboursement INT DEFAULT 0,
+    est_valide BOOLEAN DEFAULT FALSE,
+    duree_mois INT NOT NULL,
     FOREIGN KEY (id_client) REFERENCES Client(id),
     FOREIGN KEY (id_type_pret) REFERENCES TypePret(id)
 );

@@ -293,15 +293,15 @@
           const tbody = document.querySelector("#table-prets tbody");
           tbody.innerHTML = "";
           data.forEach((p) => {
-            let actions = "";
-            if (p.statut === "EN ATTENTE") {
-              actions = `<button class="btn btn-warning btn-sm" onclick="annulerPret(${p.id})">Annuler</button>`;
+            let actions = '';
+            if (p.statut === 'ACCORDE') {
+              actions = `<button class="btn btn-success btn-sm" onclick="rembourserPret(${p.id})" ${p.montant_restant <= 0 ? 'disabled' : ''}>Rembourser (${p.mensualite} €)</button>`;
             } else {
               actions = p.statut;
             }
             const row = tbody.insertRow();
             row.dataset.pretId = p.id;
-            row.innerHTML = `<td>${p.id}</td><td>${p.type_pret}</td><td>${p.montant} €</td><td>${p.date_demande}</td><td>${p.statut}</td><td>${actions}</td><td><button class="btn btn-warning btn-sm" onclick="afficherRemboursement(${p.id}, ${p.montant}, '${p.type_pret}', ${p.duree_mois}, ${p.assurance}, ${p.delai_premier_remboursement})">Voir Remboursement</button></td>`;
+            row.innerHTML = `<td>${p.id}</td><td>${p.type_pret}</td><td>${p.montant} €</td><td>${p.date_demande}</td><td>${p.statut}</td><td>${actions}</td><td>${p.montant_restant} €</td>`;
             row.onclick = () => {
               document
                 .querySelectorAll("#table-prets tbody tr")
@@ -452,6 +452,20 @@
         document.body.appendChild(form);
         form.submit();
         document.body.removeChild(form);
+      }
+
+      function rembourserPret(id_pret) {
+        if (confirm("Êtes-vous sûr de vouloir procéder au remboursement de ce mois-ci ?")) {
+          ajax("POST", "/remboursements", { id_pret }, (data) => {
+            if (data.success) {
+              alert("Remboursement effectué avec succès.");
+              chargerPrets();
+              chargerFondsClient();
+            } else {
+              alert(`Échec du remboursement: ${data.error}`);
+            }
+          });
+        }
       }
 
       function initialiserApp() {

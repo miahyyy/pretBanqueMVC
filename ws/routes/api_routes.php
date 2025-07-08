@@ -5,6 +5,7 @@ require_once __DIR__ . '/../controllers/ClientController.php';
 require_once __DIR__ . '/../controllers/PretController.php';
 require_once __DIR__ . '/../controllers/PdfController.php';
 require_once __DIR__ . '/../controllers/InteretController.php';
+require_once __DIR__ . '/../controllers/RemboursementController.php';
 
 // GESTION DE L'ÉTABLISSEMENT FINANCIER
 Flight::route('GET /ef/fonds', ['EtablissementFinancierController', 'getFonds']);
@@ -33,7 +34,14 @@ Flight::route('POST /prets/@id/rejeter', ['PretController', 'rejeter']);
 Flight::route('POST /prets/@id/annuler', ['PretController', 'annuler']);
 Flight::route('POST /prets/@id/valider', ['PretController', 'valider']);
 Flight::route('POST /prets/simuler', ['PretController', 'simuler']);
+Flight::route('POST /prets/simulation/save', ['PretController', 'saveSimulation']);
+Flight::route('GET /prets/simulations', ['PretController', 'getSimulations']);
 
 Flight::route('POST /pdf/generate', ['PdfController', 'generate']);
+
+Flight::route('GET /interets-gagnes', ['InteretController', 'getInterets']);
+
+// GESTION DES REMBOURSEMENTS
+Flight::route('POST /remboursements', ['RemboursementController', 'process']);
 
 Flight::route('GET /interets-gagnes', ['InteretController', 'getInterets']);

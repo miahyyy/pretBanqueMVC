@@ -18,7 +18,7 @@ class Pret {
     public static function getByClientId($id_client) {
         $db = getDB();
         $query = "
-            SELECT p.id, tp.nom AS type_pret, p.montant, p.date_demande, p.statut
+            SELECT p.id, tp.nom AS type_pret, p.montant, p.date_demande, p.statut, p.mensualite, p.montant_restant
             FROM Pret p
             JOIN TypePret tp ON p.id_type_pret = tp.id
             WHERE p.id_client = ?
@@ -167,7 +167,7 @@ class Pret {
         $db->beginTransaction();
 
         try {
-            $stmt_pret = $db->prepare("SELECT id_client, montant, statut FROM Pret WHERE id = ?");
+            $stmt_pret = $db->prepare("SELECT p.*, tp.taux FROM Pret p JOIN TypePret tp ON p.id_type_pret = tp.id WHERE p.id = ?");
             $stmt_pret->execute([$id]);
             $pret = $stmt_pret->fetch(PDO::FETCH_ASSOC);
 
@@ -185,17 +185,36 @@ class Pret {
                 throw new Exception("Fonds insuffisants pour approuver ce prêt.");
             }
 
-            $stmt_update_pret = $db->prepare("UPDATE Pret SET statut = 'ACCORDE' WHERE id = ?");
-            $stmt_update_pret->execute([$id]);
+            // Calcul de la mensualité
+            $taux_mensuel = ($pret['taux'] / 100) / 12;
+            $duree_mois = $pret['duree_mois'];
+            $montant_pret = $pret['montant'];
+            $mensualite = 0;
+            if ($taux_mensuel > 0) {
+                $mensualite = $montant_pret * ($taux_mensuel * pow(1 + $taux_mensuel, $duree_mois)) / (pow(1 + $taux_mensuel, $duree_mois) - 1);
+            } else {
+                $mensualite = $montant_pret / $duree_mois;
+            }
+
+            $stmt_update_pret = $db->prepare("UPDATE Pret SET statut = 'ACCORDE', mensualite = ?, montant_restant = ? WHERE id = ?");
+            $stmt_update_pret->execute([round($mensualite, 2), $montant_pret, $id]);
 
             $stmt_update_fonds = $db->prepare("UPDATE EtablissementFinancier SET fond = fond - ?");
             $stmt_update_fonds->execute([$pret['montant']]);
             
-            $stmt_update_historique_fonds = $db->prepare("INSERT INTO historique_EtablissementFinancier (fond, type) VALUES (?, 'SORTIE')");
-            $stmt_update_historique_fonds->execute([$pret['montant']]);
+            $stmt_update_historique_fonds = $db->prepare("INSERT INTO historique_EtablissementFinancier (fond, type, description) VALUES (?, 'SORTIE', ?)");
+            $stmt_update_historique_fonds->execute([$pret['montant'], 'Approbation du prêt #' . $id]);
 
-            $stmt_update_client = $db->prepare("UPDATE Client SET compte = compte + ? WHERE id = ?");
-            $stmt_update_client->execute([$pret['montant'], $pret['id_client']]);
+            // Mettre à jour le compte du client
+            $stmt_client_fond = $db->prepare("SELECT id FROM Fond_Client WHERE id_client = ?");
+            $stmt_client_fond->execute([$pret['id_client']]);
+            if ($stmt_client_fond->fetch()) {
+                $stmt_update_client = $db->prepare("UPDATE Fond_Client SET compte = compte + ? WHERE id_client = ?");
+                $stmt_update_client->execute([$pret['montant'], $pret['id_client']]);
+            } else {
+                $stmt_insert_client = $db->prepare("INSERT INTO Fond_Client (id_client, compte) VALUES (?, ?)");
+                $stmt_insert_client->execute([$pret['id_client'], $pret['montant']]);
+            }
 
             $db->commit();
             return ['message' => 'Prêt approuvé avec succès.'];
